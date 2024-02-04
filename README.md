@@ -1,6 +1,6 @@
 # Shared Variance Component Analysis (SVCA)
 Shared Variance Component Analysis (SVCA, [Stringer et al.](https://doi.org/10.1126/science.aav7893)) is a
-clever and straightforward method to estimate the dimensionality of (neural) data. This repository contains a
+straightforward yet rigorous method to estimate the dimensionality of (neural) data. This repository contains a
 Python-based implementation. See `docs/` for an application to data from the paper, and to synthetic data.
 
 ![SVCA](./figures/SVCA.png)
