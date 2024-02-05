@@ -1,11 +1,11 @@
 # Shared Variance Component Analysis (SVCA)
 Shared Variance Component Analysis (SVCA, [Stringer et al.](https://doi.org/10.1126/science.aav7893)) is a
 rigorous and straightforward method to estimate the dimensionality of neural data. This repository contains a
-Python-based implementation. See `docs/` for an application to an example dataset and synthetic data.
+Python-based implementation, with an application to example data (see `docs/`). 
 
 ![SVCA](./figures/SVCA.png)
 
-Briefly, SVCA estimates reliable variance using cross-validation along both the observation (time) and feature (neuron) axes. First, the covariance between two (spatially) non-overlapping groups of neurons is computed based on their activity during training time points. A singular value decomposition (SVD) of the covariance is used to compute orthogonal bases for both activity sets. The amount of shared or reliable variance is then defined as the variance captured by this basis in test samples.
+Briefly, SVCA estimates reliable variance using cross-validation along both the observation (time) and feature (neuron) axes. First, the covariance between two (spatially) non-overlapping groups of neurons is computed based on their activity during training time points. A singular value decomposition (SVD) of the covariance is used to compute orthogonal bases for both activity sets. The amount of variance captured by this basis in test samples is defined as reliable. 
 
 Key metrics of a dataset's dimensionality are the number of components required to capture at least, say, 85% of the total reliable variance, and the fraction of reliable variance among those components.
 
