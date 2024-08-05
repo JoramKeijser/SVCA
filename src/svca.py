@@ -5,6 +5,7 @@ from Stringer et al., Science 2019, https://doi.org/10.1126/science.aav7893
 import numpy as np
 from scipy.linalg import svd
 import warnings
+from sklearn.preprocessing import StandardScaler
 
 def svca(Ftrain, Ftest, Gtrain, Gtest, n_dims = None):
     """
@@ -58,7 +59,7 @@ def svca(Ftrain, Ftest, Gtrain, Gtest, n_dims = None):
     return reliable_variance, all_variance, SVC1, SVC2
 
 
-def split_data(X, position, bin_width = None, neuron_bins = 16, time_bins = 60, shuffle = False, seed = None):
+def split_data(X, position, bin_width = None, neuron_bins = 16, time_bins = 60, shuffle = False, seed = None, zscore = True):
     """
     Split data along time/observation and neuron/feature axes and subtract mean activity for each neuron
 
@@ -72,6 +73,7 @@ def split_data(X, position, bin_width = None, neuron_bins = 16, time_bins = 60, 
         time_bins (int): width (same units as time axis) of time bins
         shuffle (bool): shuffle observations for each neuron
         seed (int): for fixing randomness - ignored unless shuffle is True
+        zscore (bool): z-score data using mean & sd from train samples? False -> center only
 
     Returns:
         Ftrain (train samples, neurons set 1)
@@ -92,6 +94,7 @@ def split_data(X, position, bin_width = None, neuron_bins = 16, time_bins = 60, 
         warnings.warn(f"Using bin_width variable to split neurons; ignoring neuron_bins")
     if not shuffle and seed is not None:
         warnings.warn(f"Ignoring provided random seed {seed}")
+    
     # Create bins spanning spatial positions
     bins = np.arange(position.min(), position.max()+bin_width, bin_width)
     # Combine neurons into alternating even/odd groups
@@ -102,17 +105,20 @@ def split_data(X, position, bin_width = None, neuron_bins = 16, time_bins = 60, 
     # Extend to >=2 bins to include all observations
     n_reps = np.round(time_steps/(2*time_bins)) +1
     time_id = np.tile(split_id, int(n_reps))[:time_steps]
+    
     # Now we can split along both axes
     Ftrain = X[time_id == 0][:,neuron_id]
     Ftest = X[time_id == 1][:,neuron_id]
     Gtrain = X[time_id == 0][:,~neuron_id]
     Gtest = X[time_id == 1][:,~neuron_id]
-    # Center each neuron
-    mu_F = Ftrain.mean(0, keepdims=True)
-    Ftrain -= mu_F
-    Ftest -= mu_F
-    mu_G = Gtrain.mean(0, keepdims=True)
-    Gtrain -= mu_G
-    Gtest -= mu_G
+    
+    # Center each neuron by subtracting mean in train data
+    # if zscore: also scale by standard deviation
+    Fscaler = StandardScaler(with_std = zscore)
+    Ftrain = Fscaler.fit_transform(Ftrain)
+    Ftest = Fscaler.transform(Ftest)
+    Gscaler = StandardScaler(with_std = zscore)
+    Gtrain = Gscaler.fit_transform(Gtrain)
+    Gtest = Fscaler.transform(Gtest)
 
     return Ftrain, Ftest, Gtrain, Gtest
