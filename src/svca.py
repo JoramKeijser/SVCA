@@ -59,14 +59,14 @@ def svca(Ftrain, Ftest, Gtrain, Gtest, n_dims = None):
     return reliable_variance, all_variance, SVC1, SVC2
 
 
-def split_data(X, position, bin_width = None, neuron_bins = 16, time_bins = 60, shuffle = False, seed = None, zscore = True):
+def split_data(X, position = None, bin_width = None, neuron_bins = 16, time_bins = 60, shuffle = False, seed = None, zscore = True):
     """
     Split data along time/observation and neuron/feature axes and subtract mean activity for each neuron
 
     Arguments:
         X (array): observations (time bins) x features (neurons)
         position (array): position of each neuron - should be x or y direction
-            to avoid overlap in z-direction
+            to avoid overlap in z-direction. If None, use orders of activity
         bin_width (float): width (same units as position) of bins in
             which to divide neurons. If None - use neuron_bins
         neuron_bins (int): number of bins/strips - ignored unless bin_width is None
@@ -82,6 +82,8 @@ def split_data(X, position, bin_width = None, neuron_bins = 16, time_bins = 60, 
         Gtest (test samples, neurons set 2)
     """
     time_steps, neurons = X.shape
+    if position is None:
+        position = np.arange(neurons)
     if shuffle: # Permute observations of each neuron
         rng = np.random.RandomState(seed)
         n_neurons = X.shape[1]
@@ -119,6 +121,6 @@ def split_data(X, position, bin_width = None, neuron_bins = 16, time_bins = 60, 
     Ftest = Fscaler.transform(Ftest)
     Gscaler = StandardScaler(with_std = zscore)
     Gtrain = Gscaler.fit_transform(Gtrain)
-    Gtest = Fscaler.transform(Gtest)
+    Gtest = Gscaler.transform(Gtest)
 
     return Ftrain, Ftest, Gtrain, Gtest
